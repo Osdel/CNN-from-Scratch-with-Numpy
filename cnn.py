@@ -6,6 +6,8 @@ class conv3d:
 	"""
 	def __init__(self, volume3d, W, stride, padding):
 		self.volume3d = volume3d
+		if padding:
+			self.volume3d = self.pad(padding)
 		self.W = W
 		self.stride = stride
 		self.padding = padding
@@ -26,6 +28,19 @@ class conv3d:
 
 	def __getitem__(self,key):
 		return self.output[key]	
+
+	"""
+	Pad the volume3d[:,:,i] with 'padding' zeros simetrically
+	"""	
+	def pad(self,padding):
+		x = self.volume3d
+		newshape = x.shape + np.array([2*padding,2*padding,0])
+		result = np.zeros(newshape)
+		depth = x.shape[2]
+		for i in range(depth):
+			temp = x[:,:,i]
+			result[:,:,i] = np.lib.pad(temp,padding,'constant',constant_values=(0))
+		return result
 
 	"""
 		Calculate the output element at [i,j,d] 
@@ -56,4 +71,4 @@ class conv3d:
 	def convolve(self):
 		for k in range(int(self.k)):
 			self.convolve_layer(k)
-		return self.output
+		return self.output		

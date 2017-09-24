@@ -92,9 +92,9 @@ b = np.ndarray(shape=(3,3,2), buffer=np.array([1,0]*9), offset=0, dtype=int)
 	
 
 X = merge_layers([x0,x1,x2])
-w = merge_layers([w0,w1,w2])
-ww = merge_layers([w3,w4,w5])
-W = np.array([w,ww])
+W0 = merge_layers([w0,w1,w2])
+W1 = merge_layers([w3,w4,w5])
+W = np.array([W0,W1])
 
 cnnl = conv3d(X,W,stride=2,padding=0) + b
 print(cnnl[:,:,0])
