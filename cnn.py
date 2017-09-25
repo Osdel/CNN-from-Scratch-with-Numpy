@@ -52,7 +52,6 @@ class conv3d:
 			x.append(np.sum(self.volume3d[i:i+f,j:j+f,a] * self.W[d,:,:,a]))
 		return np.sum(x)
 
-    
 	def convolve_layer(self, depth):
 		rows=0
 		cols=0
@@ -66,9 +65,57 @@ class conv3d:
 		self.output[:,:,depth]=output
 
 	"""
-		Convolve the entire output
+		Convolve with the basic algorithm the entire output
 	"""	
-	def convolve(self):
+	def convolve_basic(self):
 		for k in range(int(self.k)):
 			self.convolve_layer(k)
-		return self.output		
+		return self.output
+
+	"""
+	Another convolution method, memory use expensive, but faster algorithm than convolve_basic, 
+	because is a simple matrix multiplication and can be computed with gpu
+	"""	
+	def convolve_im2col(self):
+		w_dim = np.prod(self.W.shape[1:])
+		cols = []
+		weights = []
+		#creating the volumes matrix
+		s = self.stride
+		f = self.W.shape[1]
+		w = self.width*self.height
+		for i in range(0, int(self.volume3d.shape[0]-s), s):
+			for j in range(0, int(self.volume3d.shape[1]-s), s):
+				region = self.volume3d[i:i+f, j:j+f, :]
+				region = region.reshape((w_dim,))
+				cols.append(region)
+		cols = np.array(cols).T
+		#creating the weights matrix
+		for k in range(self.k):
+			current = self.W[k,:,:,:]
+			current = current.reshape((w_dim,))
+			weights.append(current)
+		weights = np.array(weights)
+		#compute the matrix dot multipication
+		result = np.dot(weights,cols)
+		#reshape the output
+		result = result.reshape(self.k, self.W.shape[1], self.W.shape[1])
+		temp = result
+		result = np.zeros(self.output.shape)
+		for k in range(self.k):
+			result[:,:,k] = temp[k,:,:]
+		self.output = result
+		return result
+
+	"""
+	Main convolution method.
+	method: The convolution method to use, 'convolve_basic' for default, to use im2col method
+	call it with method='convolve_im2col'
+	"""	
+	def convolve(self,method="convolve_basic"):
+		if method == "convolve_im2col":
+			return self.convolve_im2col()
+		else:
+			return self.convolve_basic()	
+
+

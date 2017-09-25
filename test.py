@@ -96,9 +96,10 @@ W0 = merge_layers([w0,w1,w2])
 W1 = merge_layers([w3,w4,w5])
 W = np.array([W0,W1])
 
-cnnl = conv3d(X,W,stride=2,padding=0) + b
+cnnl = conv3d(X, W, stride=2, padding=0) + b
 print(cnnl[:,:,0])
 print(cnnl[:,:,1])
+
 
 
 
