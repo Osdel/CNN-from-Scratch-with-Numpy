@@ -1,5 +1,5 @@
 import numpy as np 
-from cnn import conv3d
+from cnn import conv2d
 from utils import merge_layers
 
 """
@@ -93,10 +93,13 @@ b = np.ndarray(shape=(3,3,2), buffer=np.array([1,0]*9), offset=0, dtype=int)
 
 X = merge_layers([x0,x1,x2])
 W0 = merge_layers([w0,w1,w2])
+
 W1 = merge_layers([w3,w4,w5])
 W = np.array([W0,W1])
 
-cnnl = conv3d(X, W, stride=2, padding=0) + b
+cnnl = conv2d(X, W, stride=2, padding=0) + b
+
+
 print(cnnl[:,:,0])
 print(cnnl[:,:,1])
 
